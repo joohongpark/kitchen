@@ -1,0 +1,10 @@
+[package]
+name = "ntfy"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[dependencies]
+reqwest.workspace = true
+serde.workspace = true
+thiserror.workspace = true

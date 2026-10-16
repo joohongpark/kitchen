@@ -1,0 +1,36 @@
+[package]
+name = "server"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[[bin]]
+name = "kitchen"
+path = "src/main.rs"
+
+[dependencies]
+common.workspace = true
+pantry.workspace = true
+recipes.workspace = true
+media.workspace = true
+queue.workspace = true
+ntfy.workspace = true
+anyhow.workspace = true
+axum.workspace = true
+axum-extra.workspace = true
+chrono.workspace = true
+dotenvy.workspace = true
+hex.workspace = true
+mime_guess.workspace = true
+rand.workspace = true
+reqwest.workspace = true
+rust-embed.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+sha2.workspace = true
+sqlx.workspace = true
+tokio.workspace = true
+tokio-util.workspace = true
+tower-http.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true

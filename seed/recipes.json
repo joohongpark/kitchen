@@ -1,0 +1,469 @@
+[
+  {
+    "title": "아욱된장국",
+    "description": "아욱을 치대어 풋내를 빼고 된장 국물에 부드럽게 끓인 국",
+    "servings": 2,
+    "cook_minutes": 30,
+    "tags": [
+      "국",
+      "된장"
+    ],
+    "ingredients": [
+      {
+        "name": "아욱",
+        "category": "채소",
+        "quantity": 200,
+        "unit": "g"
+      },
+      {
+        "name": "된장",
+        "category": "장류",
+        "quantity": 2,
+        "unit": "큰술"
+      },
+      {
+        "name": "고추장",
+        "category": "장류",
+        "quantity": 0.5,
+        "unit": "큰술",
+        "optional": true
+      },
+      {
+        "name": "두부",
+        "category": "두부·콩",
+        "quantity": 0.5,
+        "unit": "모",
+        "optional": true
+      },
+      {
+        "name": "국물용 멸치",
+        "category": "건어물",
+        "quantity": 10,
+        "unit": "g"
+      },
+      {
+        "name": "다시마",
+        "category": "건어물",
+        "amount_text": "손바닥 1장"
+      },
+      {
+        "name": "대파",
+        "category": "채소",
+        "quantity": 0.5,
+        "unit": "대"
+      },
+      {
+        "name": "다진마늘",
+        "category": "양념",
+        "quantity": 1,
+        "unit": "작은술"
+      },
+      {
+        "name": "청양고추",
+        "category": "채소",
+        "quantity": 1,
+        "unit": "개",
+        "optional": true
+      }
+    ],
+    "steps": [
+      {
+        "body": "물 800ml에 멸치와 다시마를 넣고 10분 끓인 뒤 건져 육수를 만든다."
+      },
+      {
+        "body": "아욱은 줄기 껍질을 벗기고 굵은소금을 약간 넣어 바락바락 치대 초록 물이 나오면 헹군다."
+      },
+      {
+        "body": "육수에 된장(과 고추장)을 풀고 끓어오르면 아욱을 넣어 중불에서 10분 끓인다."
+      },
+      {
+        "body": "두부, 다진마늘, 대파, 청양고추를 넣고 3분 더 끓인다. 간이 부족하면 국간장으로 맞춘다."
+      }
+    ]
+  },
+  {
+    "title": "황태미역국",
+    "description": "황태를 참기름에 볶아 뽀얗게 우린 미역국",
+    "servings": 3,
+    "cook_minutes": 35,
+    "tags": [
+      "국"
+    ],
+    "ingredients": [
+      {
+        "name": "건미역",
+        "category": "건어물",
+        "quantity": 15,
+        "unit": "g"
+      },
+      {
+        "name": "황태채",
+        "category": "건어물",
+        "quantity": 30,
+        "unit": "g"
+      },
+      {
+        "name": "참기름",
+        "category": "양념",
+        "quantity": 1,
+        "unit": "큰술"
+      },
+      {
+        "name": "국간장",
+        "category": "장류",
+        "quantity": 2,
+        "unit": "큰술"
+      },
+      {
+        "name": "멸치액젓",
+        "category": "장류",
+        "quantity": 1,
+        "unit": "작은술",
+        "optional": true
+      },
+      {
+        "name": "다진마늘",
+        "category": "양념",
+        "quantity": 1,
+        "unit": "작은술"
+      }
+    ],
+    "steps": [
+      {
+        "body": "미역은 찬물에 20분 불려 바락바락 씻고 먹기 좋게 자른다. 황태채는 물에 살짝 적셔 짠다."
+      },
+      {
+        "body": "냄비에 참기름을 두르고 황태채를 볶다가 미역과 국간장 1큰술을 넣어 2~3분 더 볶는다."
+      },
+      {
+        "body": "물 1.2L를 붓고 센불에서 끓이다가 끓어오르면 중약불로 20분 뭉근하게 끓인다."
+      },
+      {
+        "body": "다진마늘을 넣고 남은 국간장과 액젓으로 간을 맞춘다."
+      }
+    ]
+  },
+  {
+    "title": "쫑상추겉절이",
+    "description": "쫑상추(꽃상추)를 새콤달콤 매콤하게 바로 무쳐 먹는 겉절이",
+    "servings": 2,
+    "cook_minutes": 10,
+    "tags": [
+      "반찬",
+      "무침"
+    ],
+    "ingredients": [
+      {
+        "name": "쫑상추",
+        "category": "채소",
+        "quantity": 150,
+        "unit": "g"
+      },
+      {
+        "name": "양파",
+        "category": "채소",
+        "quantity": 0.25,
+        "unit": "개",
+        "optional": true
+      },
+      {
+        "name": "고춧가루",
+        "category": "양념",
+        "quantity": 1,
+        "unit": "큰술"
+      },
+      {
+        "name": "멸치액젓",
+        "category": "장류",
+        "quantity": 1,
+        "unit": "큰술"
+      },
+      {
+        "name": "식초",
+        "category": "양념",
+        "quantity": 1,
+        "unit": "큰술"
+      },
+      {
+        "name": "설탕",
+        "category": "양념",
+        "quantity": 0.5,
+        "unit": "큰술"
+      },
+      {
+        "name": "다진마늘",
+        "category": "양념",
+        "quantity": 0.5,
+        "unit": "작은술"
+      },
+      {
+        "name": "참기름",
+        "category": "양념",
+        "quantity": 1,
+        "unit": "작은술"
+      },
+      {
+        "name": "통깨",
+        "category": "양념",
+        "amount_text": "약간"
+      }
+    ],
+    "steps": [
+      {
+        "body": "쫑상추는 씻어 물기를 완전히 털고 먹기 좋게 뜯는다. 양파는 얇게 채 썬다."
+      },
+      {
+        "body": "고춧가루, 액젓, 식초, 설탕, 다진마늘을 섞어 양념장을 만든다."
+      },
+      {
+        "body": "먹기 직전에 상추와 양파에 양념장을 넣고 살살 버무린 뒤 참기름과 통깨를 뿌린다."
+      }
+    ]
+  },
+  {
+    "title": "얼큰닭개장",
+    "description": "삶은 닭을 찢어 고사리·숙주·대파와 얼큰하게 끓인 닭개장",
+    "servings": 4,
+    "cook_minutes": 80,
+    "tags": [
+      "국",
+      "얼큰"
+    ],
+    "ingredients": [
+      {
+        "name": "닭",
+        "category": "육류",
+        "quantity": 1,
+        "unit": "마리"
+      },
+      {
+        "name": "대파",
+        "category": "채소",
+        "quantity": 3,
+        "unit": "대"
+      },
+      {
+        "name": "삶은 고사리",
+        "category": "채소",
+        "quantity": 150,
+        "unit": "g"
+      },
+      {
+        "name": "숙주",
+        "category": "채소",
+        "quantity": 200,
+        "unit": "g"
+      },
+      {
+        "name": "양파",
+        "category": "채소",
+        "quantity": 1,
+        "unit": "개"
+      },
+      {
+        "name": "고춧가루",
+        "category": "양념",
+        "quantity": 3,
+        "unit": "큰술"
+      },
+      {
+        "name": "국간장",
+        "category": "장류",
+        "quantity": 2,
+        "unit": "큰술"
+      },
+      {
+        "name": "다진마늘",
+        "category": "양념",
+        "quantity": 1,
+        "unit": "큰술"
+      },
+      {
+        "name": "식용유",
+        "category": "양념",
+        "quantity": 2,
+        "unit": "큰술"
+      },
+      {
+        "name": "후추",
+        "category": "양념",
+        "amount_text": "약간"
+      },
+      {
+        "name": "달걀",
+        "category": "달걀·유제품",
+        "quantity": 1,
+        "unit": "개",
+        "optional": true
+      }
+    ],
+    "steps": [
+      {
+        "body": "닭을 씻어 물 2.5L, 대파 뿌리·파란 부분과 함께 40분 삶는다. 닭은 건져 살만 찢고 국물은 거른다."
+      },
+      {
+        "body": "대파 흰 부분은 5cm 길이로 썰고, 고사리는 먹기 좋게 자르고, 양파는 채 썬다."
+      },
+      {
+        "body": "냄비에 식용유와 고춧가루를 약불에서 볶아 고추기름을 낸다 (타지 않게 주의)."
+      },
+      {
+        "body": "찢은 닭, 고사리, 대파, 다진마늘, 국간장을 고추기름에 버무려 밑간한다."
+      },
+      {
+        "body": "닭 육수를 붓고 20분 끓인 뒤 숙주와 양파를 넣고 5분 더 끓인다. 달걀을 풀어 넣고 소금·후추로 간한다."
+      }
+    ]
+  },
+  {
+    "title": "두부된장국",
+    "description": "두부와 애호박, 양파로 끓인 기본 된장국",
+    "servings": 2,
+    "cook_minutes": 20,
+    "tags": [
+      "국",
+      "된장"
+    ],
+    "ingredients": [
+      {
+        "name": "두부",
+        "category": "두부·콩",
+        "quantity": 0.5,
+        "unit": "모"
+      },
+      {
+        "name": "된장",
+        "category": "장류",
+        "quantity": 1.5,
+        "unit": "큰술"
+      },
+      {
+        "name": "애호박",
+        "category": "채소",
+        "quantity": 0.3,
+        "unit": "개",
+        "optional": true
+      },
+      {
+        "name": "양파",
+        "category": "채소",
+        "quantity": 0.25,
+        "unit": "개"
+      },
+      {
+        "name": "대파",
+        "category": "채소",
+        "quantity": 0.3,
+        "unit": "대"
+      },
+      {
+        "name": "국물용 멸치",
+        "category": "건어물",
+        "quantity": 8,
+        "unit": "g"
+      },
+      {
+        "name": "다시마",
+        "category": "건어물",
+        "amount_text": "손바닥 1장",
+        "optional": true
+      },
+      {
+        "name": "다진마늘",
+        "category": "양념",
+        "quantity": 0.5,
+        "unit": "작은술"
+      }
+    ],
+    "steps": [
+      {
+        "body": "물 700ml에 멸치(와 다시마)를 넣고 10분 끓여 육수를 만든다."
+      },
+      {
+        "body": "두부는 깍둑썰고, 애호박은 반달썰기, 양파는 한입 크기로 썬다."
+      },
+      {
+        "body": "육수에 된장을 풀고 애호박과 양파를 넣어 5분 끓인다."
+      },
+      {
+        "body": "두부, 다진마늘, 대파를 넣고 2~3분 더 끓인다."
+      }
+    ]
+  },
+  {
+    "title": "배추된장국",
+    "description": "알배추나 배추 속대로 달큰하게 끓인 된장국",
+    "servings": 2,
+    "cook_minutes": 25,
+    "tags": [
+      "국",
+      "된장"
+    ],
+    "ingredients": [
+      {
+        "name": "배추",
+        "category": "채소",
+        "quantity": 200,
+        "unit": "g"
+      },
+      {
+        "name": "된장",
+        "category": "장류",
+        "quantity": 1.5,
+        "unit": "큰술"
+      },
+      {
+        "name": "두부",
+        "category": "두부·콩",
+        "quantity": 0.3,
+        "unit": "모",
+        "optional": true
+      },
+      {
+        "name": "대파",
+        "category": "채소",
+        "quantity": 0.3,
+        "unit": "대"
+      },
+      {
+        "name": "국물용 멸치",
+        "category": "건어물",
+        "quantity": 8,
+        "unit": "g"
+      },
+      {
+        "name": "다시마",
+        "category": "건어물",
+        "amount_text": "손바닥 1장",
+        "optional": true
+      },
+      {
+        "name": "다진마늘",
+        "category": "양념",
+        "quantity": 0.5,
+        "unit": "작은술"
+      },
+      {
+        "name": "멸치액젓",
+        "category": "장류",
+        "quantity": 0.5,
+        "unit": "작은술",
+        "optional": true
+      }
+    ],
+    "steps": [
+      {
+        "body": "물 700ml에 멸치(와 다시마)를 넣고 10분 끓여 육수를 만든다."
+      },
+      {
+        "body": "배추는 한입 크기로 썬다. 데쳐서 넣으면 더 부드럽다."
+      },
+      {
+        "body": "육수에 된장을 풀고 배추를 넣어 배추가 투명해질 때까지 8~10분 끓인다."
+      },
+      {
+        "body": "두부, 다진마늘, 대파를 넣고 한소끔 끓인 뒤 액젓으로 간을 맞춘다."
+      }
+    ]
+  }
+]

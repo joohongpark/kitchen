@@ -1,0 +1,9 @@
+{
+  "name": "부엌 — 식재료·레시피",
+  "short_name": "부엌",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fffbf5",
+  "theme_color": "#fffbf5",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}

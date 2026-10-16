@@ -1,0 +1,19 @@
+# /etc/systemd/system/kitchen.service
+[Unit]
+Description=Kitchen (식재료·레시피 관리)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=puju
+WorkingDirectory=/home/puju/kitchen
+EnvironmentFile=/home/puju/kitchen/.env
+ExecStart=/home/puju/kitchen/target/release/kitchen serve
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/home/puju/kitchen/data
+
+[Install]
+WantedBy=multi-user.target

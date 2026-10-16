@@ -1,0 +1,11 @@
+[package]
+name = "pantry"
+version.workspace = true
+edition.workspace = true
+publish.workspace = true
+
+[dependencies]
+common.workspace = true
+chrono.workspace = true
+serde.workspace = true
+sqlx.workspace = true

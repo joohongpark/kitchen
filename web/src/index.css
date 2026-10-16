@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", system-ui, sans-serif;
+  --color-paper: #fffbf5;
+  --color-card: #ffffff;
+  --color-ink: #2b2118;
+  --color-muted: #7a6a5c;
+  --color-line: #eadfd2;
+  --color-accent: #c2410c;
+  --color-accent-soft: #fdebdc;
+  --color-ok: #3f7d4e;
+  --color-ok-soft: #e3f1e5;
+  --color-warn: #b7791f;
+  --color-warn-soft: #fbf0d9;
+  --color-bad: #b42318;
+  --color-bad-soft: #fde4e1;
+}
+
+html, body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+input, select, textarea, button {
+  font: inherit;
+}
+
+@utility field {
+  @apply w-full rounded-xl border border-line bg-card px-3 py-2.5 text-[15px] outline-none focus:border-accent focus:ring-2 focus:ring-accent/20;
+}
+@utility btn {
+  @apply inline-flex items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-[15px] font-semibold transition active:scale-[0.98] disabled:opacity-50;
+}
+@utility btn-primary {
+  @apply btn bg-accent text-white hover:bg-accent/90;
+}
+@utility btn-ghost {
+  @apply btn border border-line bg-card text-ink hover:bg-accent-soft/50;
+}
+@utility btn-danger {
+  @apply btn border border-bad/30 bg-card text-bad hover:bg-bad-soft;
+}
+@utility label {
+  @apply mb-1 block text-[13px] font-semibold text-muted;
+}
+@utility card {
+  @apply rounded-2xl border border-line bg-card;
+}
+@utility chip {
+  @apply inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-sm transition;
+}

@@ -1,0 +1,43 @@
+[workspace]
+resolver = "2"
+members = ["crates/*"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[workspace.dependencies]
+common = { path = "crates/common" }
+pantry = { path = "crates/pantry" }
+recipes = { path = "crates/recipes" }
+media = { path = "crates/media" }
+queue = { path = "crates/queue" }
+ntfy = { path = "crates/ntfy" }
+
+anyhow = "1"
+axum = { version = "0.8", features = ["multipart"] }
+axum-extra = { version = "0.10", features = ["cookie"] }
+chrono = { version = "0.4", default-features = false, features = ["clock", "serde", "std"] }
+dotenvy = "0.15"
+image = { version = "0.25", default-features = false, features = ["jpeg", "png", "webp", "gif"] }
+mime_guess = "2"
+rand = "0.9"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+rust-embed = "8"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+hex = "0.4"
+sqlx = { version = "0.8", default-features = false, features = ["runtime-tokio", "sqlite", "chrono", "macros", "migrate"] }
+thiserror = "2"
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "signal", "fs", "time"] }
+tokio-util = "0.7"
+tower-http = { version = "0.6", features = ["trace", "limit"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+uuid = { version = "1", features = ["v7"] }
+
+[profile.release]
+lto = "thin"
+strip = true
