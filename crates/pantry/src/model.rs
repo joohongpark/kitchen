@@ -13,6 +13,8 @@ pub struct Ingredient {
     pub low_threshold: Option<f64>,
     pub photo_id: Option<String>,
     pub note: Option<String>,
+    /// 묶음(상위 재료). 예: 청양 고춧가루 → 고춧가루
+    pub parent_id: Option<String>,
     pub created_at: String,
     pub updated_at: String,
 }
@@ -32,10 +34,13 @@ pub struct IngredientInput {
     pub photo_id: Option<String>,
     #[serde(default)]
     pub note: Option<String>,
+    #[serde(default)]
+    pub parent_id: Option<String>,
 }
 
 /// 식재료별 재고 상태
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize)]
+/// 순서: None < Low < Ok
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum StockStatus {
     /// 재고 없음
@@ -53,6 +58,8 @@ pub struct IngredientWithStock {
     /// 사람이 읽을 요약. 예: "2모", "보통", "300g + 넉넉"
     pub stock_summary: Option<String>,
     pub nearest_expiry: Option<NaiveDate>,
+    /// 이 재료가 묶음이면 하위 재료 id. 묶음의 재고 상태는 하위 재료를 합친 것
+    pub children: Vec<String>,
 }
 
 #[derive(Debug, Clone, Serialize, sqlx::FromRow)]

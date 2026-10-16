@@ -107,38 +107,47 @@ export function ErrorText({ error }: { error: unknown }) {
   return <p className="rounded-xl bg-bad-soft px-3 py-2 text-sm text-bad">{error instanceof Error ? error.message : String(error)}</p>;
 }
 
-/** 사진 선택/촬영 → 업로드 → photo_id 반환 */
-export function PhotoField({ value, onChange, label = "사진" }: { value: string | null; onChange: (id: string | null) => void; label?: string }) {
+/** 숨겨진 파일 입력 + 업로드. `open()` 으로 사진 선택/촬영 창을 연다 */
+export function usePhotoPicker(onUploaded: (id: string) => void) {
   const input = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState<unknown>(null);
+  const [error, setError] = useState<unknown>(null);
 
   async function pick(file: File | undefined) {
     if (!file) return;
     setBusy(true);
-    setErr(null);
+    setError(null);
     try {
-      onChange((await api.uploadPhoto(file)).id);
+      onUploaded((await api.uploadPhoto(file)).id);
     } catch (e) {
-      setErr(e);
+      setError(e);
     } finally {
       setBusy(false);
       if (input.current) input.current.value = "";
     }
   }
 
+  const element = <input ref={input} type="file" accept="image/*" hidden onChange={(e) => pick(e.target.files?.[0])} />;
+  return { open: () => input.current?.click(), element, busy, error };
+}
+
+/** 사진 선택/촬영 → 업로드 → photo_id 반환 */
+export function PhotoField({ value, onChange, label = "사진" }: { value: string | null; onChange: (id: string | null) => void; label?: string }) {
+  const picker = usePhotoPicker(onChange);
   return (
     <div>
       <span className="label">{label}</span>
       <div className="flex items-center gap-3">
-        {value ? (
-          <img src={photoUrl(value)} alt="" className="size-20 rounded-xl border border-line object-cover" />
-        ) : (
-          <div className="grid size-20 place-items-center rounded-xl border border-dashed border-line text-2xl text-muted">📷</div>
-        )}
+        <button type="button" onClick={picker.open} disabled={picker.busy} className="shrink-0">
+          {value ? (
+            <img src={photoUrl(value)} alt="" className="size-20 rounded-xl border border-line object-cover" />
+          ) : (
+            <div className="grid size-20 place-items-center rounded-xl border border-dashed border-line text-2xl text-muted">📷</div>
+          )}
+        </button>
         <div className="flex flex-col gap-1.5">
-          <button type="button" className="btn-ghost py-1.5 text-sm" disabled={busy} onClick={() => input.current?.click()}>
-            {busy ? "올리는 중…" : value ? "바꾸기" : "사진 추가"}
+          <button type="button" className="btn-ghost py-1.5 text-sm" disabled={picker.busy} onClick={picker.open}>
+            {picker.busy ? "올리는 중…" : value ? "바꾸기" : "사진 추가"}
           </button>
           {value && (
             <button type="button" className="text-sm text-muted underline" onClick={() => onChange(null)}>
@@ -146,9 +155,9 @@ export function PhotoField({ value, onChange, label = "사진" }: { value: strin
             </button>
           )}
         </div>
-        <input ref={input} type="file" accept="image/*" hidden onChange={(e) => pick(e.target.files?.[0])} />
+        {picker.element}
       </div>
-      <ErrorText error={err} />
+      <ErrorText error={picker.error} />
     </div>
   );
 }

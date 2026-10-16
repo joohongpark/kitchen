@@ -5,6 +5,8 @@
 - **재고 관리**: 수량(두부 1모, 멸치 100g)으로도, 대략(된장 넉넉/보통/조금/없음)으로도 관리. 유통기한, 보관 위치, 사진 지원
 - **레시피**: 사진, 단계별 조리법, 재료(정량 또는 "약간"), 선택 재료, 태그
 - **공통 재료 연결**: 된장·두부·액젓처럼 여러 레시피에 쓰이는 재료는 식재료 하나로 관리
+- **묶음**: 고춧가루 ← 고운/청양 고춧가루처럼 종류를 묶어서, 레시피에 "고춧가루"라고 쓰면 아무거나 있으면 됨
+- **대체 재료**: 레시피 재료마다 바꿔 쓸 수 있는 재료 지정 (차슈의 삼겹살 → 목살)
 - **뭐 해먹지?**: 재료를 여러 개 고르면 만들 수 있는 요리를 부족한 재료가 적은 순으로 추천. 아무것도 안 고르면 현재 재고 기준
 - **요리했어요**: 인분에 맞춰 재고 차감안을 만들어 주고(단위 변환, 유통기한 빠른 것부터), 확인 후 반영. 다 떨어진 재료는 장보기로
 - **장보기**: 산 것은 바로 재고로 등록
@@ -99,7 +101,8 @@ tar czf kitchen-photos.tgz data/photos
 | `GET/POST /pantry`, `GET/PUT/DELETE /pantry/{id}` | 재고 |
 | `POST /pantry/adjust` | 수량/단계만 변경 `[{pantry_item_id, quantity \| level}]` |
 | `GET /pantry/expiring?days=3` | 유통기한 임박 |
-| `GET/POST /recipes?q=&tag=`, `GET/PUT/DELETE /recipes/{id}` | 레시피 (재료는 `ingredient_id` 또는 `name`. 이름만 주면 식재료 자동 생성) |
+| `GET/POST /recipes?q=&tag=`, `GET/PUT/DELETE /recipes/{id}` | 레시피 (재료·대체 재료는 `ingredient_id` 또는 `name`. 이름만 주면 식재료 자동 생성) |
+| `PUT /recipes/{id}/photo` | 대표 사진만 변경 `{photo_id}` |
 | `POST /recipes/recommend` | `{ingredient_ids: []}` → 추천 |
 | `GET /recipes/{id}/cook-plan?servings=` | 재고 차감안 |
 | `POST /recipes/{id}/cook` | `{adjustments, note, add_missing_to_shopping}` |

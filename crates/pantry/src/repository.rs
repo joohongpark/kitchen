@@ -19,7 +19,7 @@ impl PantryRepository {
     pub async fn insert_ingredient<'c>(&self, db: impl Queryer<'c>, ing: &Ingredient) -> Result<()> {
         sqlx::query(
             "INSERT INTO ingredients (id, name, category, default_unit, default_storage, low_threshold, \
-             photo_id, note, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+             photo_id, note, parent_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
         )
         .bind(&ing.id)
         .bind(&ing.name)
@@ -29,6 +29,7 @@ impl PantryRepository {
         .bind(ing.low_threshold)
         .bind(&ing.photo_id)
         .bind(&ing.note)
+        .bind(&ing.parent_id)
         .bind(&ing.created_at)
         .bind(&ing.updated_at)
         .execute(db)
@@ -40,7 +41,7 @@ impl PantryRepository {
     pub async fn update_ingredient<'c>(&self, db: impl Queryer<'c>, ing: &Ingredient) -> Result<()> {
         let res = sqlx::query(
             "UPDATE ingredients SET name = ?, category = ?, default_unit = ?, default_storage = ?, \
-             low_threshold = ?, photo_id = ?, note = ?, updated_at = ? WHERE id = ?",
+             low_threshold = ?, photo_id = ?, note = ?, parent_id = ?, updated_at = ? WHERE id = ?",
         )
         .bind(&ing.name)
         .bind(&ing.category)
@@ -49,6 +50,7 @@ impl PantryRepository {
         .bind(ing.low_threshold)
         .bind(&ing.photo_id)
         .bind(&ing.note)
+        .bind(&ing.parent_id)
         .bind(&ing.updated_at)
         .bind(&ing.id)
         .execute(db)
@@ -88,6 +90,10 @@ impl PantryRepository {
 
     pub async fn list_ingredients<'c>(&self, db: impl Queryer<'c>) -> Result<Vec<Ingredient>> {
         Ok(sqlx::query_as("SELECT * FROM ingredients ORDER BY category, name").fetch_all(db).await?)
+    }
+
+    pub async fn count_children<'c>(&self, db: impl Queryer<'c>, id: &str) -> Result<i64> {
+        Ok(sqlx::query_scalar("SELECT COUNT(*) FROM ingredients WHERE parent_id = ?").bind(id).fetch_one(db).await?)
     }
 
     // ---------- pantry items ----------
@@ -286,7 +292,7 @@ fn map_ingredient_err(e: sqlx::Error, name: &str) -> Error {
     if is_unique_violation(&e) {
         Error::AlreadyExists(format!("식재료 '{name}'"))
     } else if is_foreign_key_violation(&e) {
-        Error::invalid("사진이 존재하지 않습니다")
+        Error::invalid("사진 또는 묶음 재료가 존재하지 않습니다")
     } else {
         e.into()
     }

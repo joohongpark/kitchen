@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from "react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api, photoUrl } from "../api";
 import { CookSheet } from "../components/CookSheet";
-import { ErrorText, StatusDot, Thumb } from "../components/ui";
+import { ErrorText, StatusDot, Thumb, usePhotoPicker } from "../components/ui";
 import { relativeDate } from "../util";
 
 export function RecipeDetailPage() {
@@ -14,7 +14,14 @@ export function RecipeDetailPage() {
   const [cooking, setCooking] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
-  const missing = r?.ingredients.filter((i) => !i.optional && i.status === "none") ?? [];
+  const setPhoto = useMutation({
+    mutationFn: (photoId: string) => api.setRecipePhoto(id, photoId),
+    onSuccess: () => qc.invalidateQueries(),
+  });
+  const photo = usePhotoPicker((photoId) => setPhoto.mutate(photoId));
+
+  // 대체 재료로 채울 수 있는 줄은 사지 않아도 된다
+  const missing = r?.ingredients.filter((i) => !i.optional && i.status === "none" && !i.substitute) ?? [];
 
   const addMissing = useMutation({
     mutationFn: async () => {
@@ -40,7 +47,13 @@ export function RecipeDetailPage() {
   return (
     <div className="-mx-4">
       <div className="relative">
-        <Thumb id={r.photo_id} className="aspect-[4/3] max-h-80 w-full text-6xl" />
+        <button type="button" className="block w-full" onClick={photo.open} disabled={photo.busy || setPhoto.isPending}>
+          <Thumb id={r.photo_id} className="aspect-[4/3] max-h-80 w-full text-6xl" />
+          <span className="absolute right-3 bottom-3 rounded-full bg-card/90 px-3 py-1.5 text-sm font-semibold shadow">
+            {photo.busy || setPhoto.isPending ? "올리는 중…" : r.photo_id ? "📷 사진 바꾸기" : "📷 사진 추가"}
+          </span>
+        </button>
+        {photo.element}
         <button
           onClick={() => navigate(-1)}
           className="absolute top-[calc(0.75rem+env(safe-area-inset-top))] left-3 grid size-10 place-items-center rounded-full bg-card/90 text-lg shadow"
@@ -85,17 +98,37 @@ export function RecipeDetailPage() {
           {toast && <p className="mb-2 rounded-xl bg-ok-soft px-3 py-2 text-sm text-ok">{toast}</p>}
           <ul className="card divide-y divide-line">
             {r.ingredients.map((i) => (
-              <li key={i.ingredient_id} className="flex items-center gap-2.5 px-3 py-2.5">
-                <StatusDot status={i.status} />
-                <span className="flex-1">
-                  {i.ingredient_name}
-                  {i.optional && <span className="ml-1 text-xs text-muted">(선택)</span>}
-                  {i.note && <span className="ml-1 text-xs text-muted">· {i.note}</span>}
-                </span>
-                <span className="text-right text-sm">
-                  <span className="font-semibold">{i.amount_label}</span>
-                  {i.stock_summary && <span className="block text-xs text-muted">재고 {i.stock_summary}</span>}
-                </span>
+              <li key={i.ingredient_id} className="px-3 py-2.5">
+                <div className="flex items-center gap-2.5">
+                  <StatusDot status={i.status} />
+                  <span className="flex-1">
+                    {i.ingredient_name}
+                    {i.optional && <span className="ml-1 text-xs text-muted">(선택)</span>}
+                    {i.note && <span className="ml-1 text-xs text-muted">· {i.note}</span>}
+                  </span>
+                  <span className="text-right text-sm">
+                    <span className="font-semibold">{i.amount_label}</span>
+                    {i.stock_summary && <span className="block text-xs text-muted">재고 {i.stock_summary}</span>}
+                  </span>
+                </div>
+                {i.alternatives.length > 0 && (
+                  <div className="mt-1 ml-5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted">
+                    {i.substitute ? (
+                      <span className="font-semibold text-ok">→ {i.substitute}(으)로 대체 가능</span>
+                    ) : (
+                      <span>대체:</span>
+                    )}
+                    {i.alternatives
+                      .filter((a) => a.name !== i.substitute)
+                      .map((a) => (
+                        <span key={a.ingredient_id} className="inline-flex items-center gap-1" title={a.note ?? undefined}>
+                          <StatusDot status={a.status} />
+                          {a.name}
+                          {a.note && <span className="text-muted">({a.note})</span>}
+                        </span>
+                      ))}
+                  </div>
+                )}
               </li>
             ))}
           </ul>
@@ -116,7 +149,7 @@ export function RecipeDetailPage() {
           </ol>
         </section>
 
-        <ErrorText error={addMissing.error ?? remove.error} />
+        <ErrorText error={addMissing.error ?? remove.error ?? setPhoto.error ?? photo.error} />
         <button
           className="mt-8 mb-4 text-sm text-bad underline"
           onClick={() => window.confirm(`'${r.title}' 레시피를 삭제할까요?`) && remove.mutate()}

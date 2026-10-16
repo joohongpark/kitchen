@@ -36,6 +36,14 @@ pub async fn update(
     Ok(Json(s.recipes.update(&id, input).await?))
 }
 
+pub async fn set_photo(
+    State(s): State<AppState>,
+    Path(id): Path<String>,
+    Json(input): Json<SetPhotoInput>,
+) -> ApiResult<Json<RecipeDetail>> {
+    Ok(Json(s.recipes.set_photo(&id, input.photo_id.as_deref()).await?))
+}
+
 pub async fn delete(State(s): State<AppState>, Path(id): Path<String>) -> ApiResult<StatusCode> {
     s.recipes.delete(&id).await?;
     Ok(StatusCode::NO_CONTENT)

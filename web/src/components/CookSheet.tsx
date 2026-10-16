@@ -82,7 +82,9 @@ export function CookSheet({
           </label>
         )}
 
-        <p className="text-sm text-muted">사용 후 남은 양을 확인하세요. 유통기한이 빠른 것부터 차감했어요.</p>
+        <p className="text-sm text-muted">
+          사용 후 남은 양을 확인하세요. 원래 재료 → 대체 재료 순으로, 유통기한이 빠른 것부터 차감했어요.
+        </p>
         <ErrorText error={error} />
         {isFetching && !plan && <p className="text-muted">계산 중…</p>}
 
@@ -104,6 +106,12 @@ export function CookSheet({
                     const v = values[lot.pantry_item_id] ?? {};
                     return (
                       <div key={lot.pantry_item_id} className="flex items-center gap-2 text-sm">
+                        {lot.ingredient_id !== line.ingredient_id && (
+                          <span className={lot.is_substitute ? "font-semibold text-accent" : "font-semibold"}>
+                            {lot.ingredient_name}
+                            {lot.is_substitute && " (대체)"}
+                          </span>
+                        )}
                         <span className="text-muted">{STORAGE_LABEL[lot.storage]}</span>
                         <ExpiryBadge date={lot.expires_at} />
                         <span className="flex-1 text-right text-muted">

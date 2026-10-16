@@ -60,6 +60,7 @@ export const api = {
   createRecipe: (b: T.RecipeInput) => post<T.RecipeDetail>("/recipes", b),
   updateRecipe: (id: string, b: T.RecipeInput) => put<T.RecipeDetail>(`/recipes/${id}`, b),
   deleteRecipe: (id: string) => del(`/recipes/${id}`),
+  setRecipePhoto: (id: string, photo_id: string | null) => put<T.RecipeDetail>(`/recipes/${id}/photo`, { photo_id }),
   recommend: (ingredient_ids: string[]) => post<T.Recommendation[]>("/recipes/recommend", { ingredient_ids }),
   cookPlan: (id: string, servings?: number) =>
     get<T.CookPlan>(`/recipes/${id}/cook-plan${servings ? `?servings=${servings}` : ""}`),

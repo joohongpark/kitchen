@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "../api";
-import { IngredientPicker } from "../components/IngredientPicker";
+import { IngredientPicker, type Picked } from "../components/IngredientPicker";
 import { ErrorText, PageHeader, PhotoField } from "../components/ui";
-import type { RecipeInput } from "../types";
+import type { IngredientWithStock, RecipeInput } from "../types";
 import { UNITS } from "../types";
 
 interface IngRow {
@@ -16,6 +16,16 @@ interface IngRow {
   amount_text: string;
   optional: boolean;
   note: string;
+  alts: AltRow[];
+  /** 대체 재료 입력 중인 값 (null 이면 입력창 닫힘) */
+  altDraft: Picked | null;
+}
+
+interface AltRow {
+  key: number;
+  ingredient_id: string | null;
+  name: string;
+  note: string;
 }
 
 interface StepRow {
@@ -25,7 +35,18 @@ interface StepRow {
 }
 
 let seq = 0;
-const newIng = (): IngRow => ({ key: ++seq, ingredient_id: null, name: "", quantity: "", unit: "", amount_text: "", optional: false, note: "" });
+const newIng = (): IngRow => ({
+  key: ++seq,
+  ingredient_id: null,
+  name: "",
+  quantity: "",
+  unit: "",
+  amount_text: "",
+  optional: false,
+  note: "",
+  alts: [],
+  altDraft: null,
+});
 const newStep = (): StepRow => ({ key: ++seq, body: "", photo_id: null });
 
 export function RecipeFormPage() {
@@ -65,6 +86,8 @@ export function RecipeFormPage() {
         amount_text: i.amount_text ?? "",
         optional: i.optional,
         note: i.note ?? "",
+        alts: i.alternatives.map((a) => ({ key: ++seq, ingredient_id: a.ingredient_id, name: a.name, note: a.note ?? "" })),
+        altDraft: null,
       })),
     );
     setSteps(existing.steps.length ? existing.steps.map((s) => ({ key: ++seq, body: s.body, photo_id: s.photo_id })) : [newStep()]);
@@ -90,6 +113,7 @@ export function RecipeFormPage() {
             amount_text: i.quantity ? null : i.amount_text || null,
             optional: i.optional,
             note: i.note || null,
+            alternatives: i.alts.map((a) => ({ ingredient_id: a.ingredient_id, name: a.name, note: a.note || null })),
           })),
         steps: steps.filter((s) => s.body.trim()).map((s) => ({ body: s.body, photo_id: s.photo_id })),
       };
@@ -203,6 +227,11 @@ export function RecipeFormPage() {
                   선택
                 </label>
               </div>
+              <AltEditor
+                row={row}
+                ingredients={ingredients}
+                onChange={(patch) => updIng(row.key, patch)}
+              />
             </li>
           ))}
         </ul>
@@ -247,5 +276,83 @@ export function RecipeFormPage() {
         {save.isPending ? "저장 중…" : "저장"}
       </button>
     </form>
+  );
+}
+
+/** 레시피 재료 줄의 대체 재료 편집 (예: 삼겹살 → 목살, 앞다리살) */
+function AltEditor({
+  row,
+  ingredients,
+  onChange,
+}: {
+  row: IngRow;
+  ingredients: IngredientWithStock[];
+  onChange: (patch: Partial<IngRow>) => void;
+}) {
+  const draft = row.altDraft;
+  const commit = () => {
+    if (!draft || !draft.name.trim()) return;
+    const exists = row.alts.some((a) => a.name === draft.name.trim()) || draft.name.trim() === row.name.trim();
+    onChange({
+      alts: exists ? row.alts : [...row.alts, { key: ++seq, ingredient_id: draft.id, name: draft.name.trim(), note: "" }],
+      altDraft: null,
+    });
+  };
+
+  return (
+    <div className="flex flex-col gap-1.5">
+      {row.alts.length > 0 && (
+        <ul className="flex flex-col gap-1.5">
+          {row.alts.map((a) => (
+            <li key={a.key} className="flex items-center gap-2 text-sm">
+              <span className="shrink-0 text-muted">↳ 대체</span>
+              <span className="shrink-0 font-semibold">{a.name}</span>
+              <input
+                className="min-w-0 flex-1 rounded-lg border border-line bg-card px-2 py-1 text-sm"
+                placeholder="메모 (예: 기름기 적어 퍽퍽함)"
+                value={a.note}
+                onChange={(e) => onChange({ alts: row.alts.map((x) => (x.key === a.key ? { ...x, note: e.target.value } : x)) })}
+              />
+              <button
+                type="button"
+                className="px-1 text-muted"
+                aria-label={`${a.name} 대체 재료 삭제`}
+                onClick={() => onChange({ alts: row.alts.filter((x) => x.key !== a.key) })}
+              >
+                ✕
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {draft ? (
+        <div className="flex gap-2">
+          <div className="flex-1">
+            <IngredientPicker
+              ingredients={ingredients}
+              value={draft.name}
+              placeholder="대체할 수 있는 재료"
+              autoFocus
+              onChange={(p) => onChange({ altDraft: p })}
+            />
+          </div>
+          <button type="button" className="btn-ghost shrink-0 px-3 py-1.5 text-sm" onClick={commit}>
+            추가
+          </button>
+          <button type="button" className="shrink-0 px-1 text-muted" onClick={() => onChange({ altDraft: null })}>
+            취소
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          className="self-start text-sm font-semibold text-accent"
+          disabled={!row.name.trim()}
+          onClick={() => onChange({ altDraft: { id: null, name: "" } })}
+        >
+          + 대체 재료
+        </button>
+      )}
+    </div>
   );
 }

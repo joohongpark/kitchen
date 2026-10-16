@@ -118,6 +118,72 @@ impl RecipesRepository {
         Ok(sqlx::query_as(&format!("{INGREDIENT_SELECT} ORDER BY ri.recipe_id, ri.position")).fetch_all(db).await?)
     }
 
+    pub async fn insert_alternative<'c>(&self, db: impl Queryer<'c>, alt: &RecipeAlternative) -> Result<()> {
+        sqlx::query(
+            "INSERT INTO recipe_ingredient_alternatives (recipe_id, ingredient_id, alt_ingredient_id, position, note) \
+             VALUES (?, ?, ?, ?, ?)",
+        )
+        .bind(&alt.recipe_id)
+        .bind(&alt.ingredient_id)
+        .bind(&alt.alt_ingredient_id)
+        .bind(alt.position)
+        .bind(&alt.note)
+        .execute(db)
+        .await
+        .map_err(|e| {
+            if is_unique_violation(&e) {
+                Error::invalid(format!("대체 재료 '{}'가 중복되었습니다", alt.alt_name))
+            } else if is_foreign_key_violation(&e) {
+                Error::invalid("존재하지 않는 대체 재료입니다")
+            } else {
+                e.into()
+            }
+        })?;
+        Ok(())
+    }
+
+    /// `recipe_id` 가 None 이면 모든 레시피의 대체 재료
+    pub async fn list_alternatives<'c>(
+        &self,
+        db: impl Queryer<'c>,
+        recipe_id: Option<&str>,
+    ) -> Result<Vec<RecipeAlternative>> {
+        Ok(sqlx::query_as(
+            "SELECT a.recipe_id, a.ingredient_id, a.alt_ingredient_id, i.name AS alt_name, a.position, a.note \
+             FROM recipe_ingredient_alternatives a JOIN ingredients i ON i.id = a.alt_ingredient_id \
+             WHERE ?1 IS NULL OR a.recipe_id = ?1 ORDER BY a.recipe_id, a.ingredient_id, a.position",
+        )
+        .bind(recipe_id)
+        .fetch_all(db)
+        .await?)
+    }
+
+    pub async fn set_photo<'c>(
+        &self,
+        db: impl Queryer<'c>,
+        id: &str,
+        photo_id: Option<&str>,
+        updated_at: &str,
+    ) -> Result<()> {
+        let res = sqlx::query("UPDATE recipes SET photo_id = ?, updated_at = ? WHERE id = ?")
+            .bind(photo_id)
+            .bind(updated_at)
+            .bind(id)
+            .execute(db)
+            .await
+            .map_err(|e| {
+                if is_foreign_key_violation(&e) {
+                    Error::invalid("사진이 존재하지 않습니다")
+                } else {
+                    e.into()
+                }
+            })?;
+        if res.rows_affected() == 0 {
+            return Err(Error::NotFound("레시피"));
+        }
+        Ok(())
+    }
+
     pub async fn delete_steps<'c>(&self, db: impl Queryer<'c>, recipe_id: &str) -> Result<()> {
         sqlx::query("DELETE FROM recipe_steps WHERE recipe_id = ?").bind(recipe_id).execute(db).await?;
         Ok(())

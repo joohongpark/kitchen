@@ -75,6 +75,12 @@ export function PantryItemSheet({
     setStorage(ing.default_storage);
   }, [picked.id, ingredients, item]);
 
+  const pickedGroup = ingredients.find((i) => i.id === picked.id && i.children.length > 0);
+  const pickedGroupKids = pickedGroup?.children
+    .map((id) => ingredients.find((i) => i.id === id)?.name)
+    .filter(Boolean)
+    .join(", ");
+
   const save = useMutation({
     mutationFn: async () => {
       let ingredientId = picked.id;
@@ -135,6 +141,11 @@ export function PantryItemSheet({
         <div>
           <span className="label">식재료</span>
           <IngredientPicker ingredients={ingredients} value={picked.name} onChange={setPicked} autoFocus={!item && !preset} />
+          {pickedGroup && (
+            <p className="mt-1 text-xs text-warn">
+              '{pickedGroup.name}'은(는) 묶음이에요. {pickedGroupKids} 같은 구체적인 재료로 등록하면 더 정확해요.
+            </p>
+          )}
           {!picked.id && picked.name.trim() && (
             <div className="mt-2">
               <span className="label">새 식재료 분류</span>

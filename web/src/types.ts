@@ -19,6 +19,8 @@ export interface Ingredient {
   low_threshold: number | null;
   photo_id: string | null;
   note: string | null;
+  /** 묶음(상위 재료) */
+  parent_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -27,6 +29,8 @@ export interface IngredientWithStock extends Ingredient {
   status: StockStatus;
   stock_summary: string | null;
   nearest_expiry: string | null;
+  /** 묶음이면 하위 재료 id */
+  children: string[];
 }
 
 export interface IngredientInput {
@@ -37,6 +41,7 @@ export interface IngredientInput {
   low_threshold?: number | null;
   photo_id?: string | null;
   note?: string | null;
+  parent_id?: string | null;
 }
 
 export interface PantryItem {
@@ -95,9 +100,15 @@ export interface MissingIngredient {
   amount_label: string;
 }
 
+export interface Substitution {
+  original: string;
+  substitute: string;
+}
+
 export interface RecipeSummary extends Recipe {
   required_count: number;
   missing: MissingIngredient[];
+  substitutions: Substitution[];
   cook_count: number;
   last_cooked_at: string | null;
 }
@@ -120,6 +131,17 @@ export interface IngredientLine {
   optional: boolean;
   note: string | null;
   amount_label: string;
+  status: StockStatus;
+  stock_summary: string | null;
+  alternatives: AlternativeLine[];
+  /** 원래 재료가 없을 때 대신 쓸 수 있는 재료 */
+  substitute: string | null;
+}
+
+export interface AlternativeLine {
+  ingredient_id: string;
+  name: string;
+  note: string | null;
   status: StockStatus;
   stock_summary: string | null;
 }
@@ -146,6 +168,7 @@ export interface RecipeIngredientInput {
   amount_text?: string | null;
   optional?: boolean;
   note?: string | null;
+  alternatives?: { ingredient_id?: string | null; name?: string | null; note?: string | null }[];
 }
 
 export interface RecipeInput {
@@ -162,6 +185,9 @@ export interface RecipeInput {
 
 export interface CookPlanLot {
   pantry_item_id: string;
+  ingredient_id: string;
+  ingredient_name: string;
+  is_substitute: boolean;
   tracking: Tracking;
   storage: Storage;
   expires_at: string | null;

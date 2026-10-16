@@ -25,6 +25,7 @@ export function IngredientPicker({
     return ingredients.filter((i) => i.name.includes(q)).slice(0, 8);
   }, [ingredients, q]);
   const exact = ingredients.find((i) => i.name === q);
+  const parentName = (id: string | null) => (id ? ingredients.find((i) => i.id === id)?.name : undefined);
 
   return (
     <div className="relative">
@@ -56,8 +57,11 @@ export function IngredientPicker({
                 }}
               >
                 <StatusDot status={i.status} />
-                <span className="flex-1">{i.name}</span>
-                <span className="text-xs text-muted">{i.category}</span>
+                <span className="flex-1">
+                  {i.name}
+                  {i.children.length > 0 && <span className="ml-1.5 rounded bg-accent-soft px-1 text-[11px] text-accent">묶음</span>}
+                </span>
+                <span className="text-xs text-muted">{parentName(i.parent_id) ?? i.category}</span>
               </button>
             </li>
           ))}

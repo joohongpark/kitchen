@@ -21,27 +21,21 @@ impl PantryService {
 
     // ---------- ingredients ----------
 
+    /// 묶음 재료는 하위 재료 재고를 합친 상태로 돌려준다
     pub async fn list_ingredients(&self) -> Result<Vec<IngredientWithStock>> {
         let ingredients = self.repo.list_ingredients(&self.db).await?;
         let items = self.repo.list_items(&self.db).await?;
-        Ok(ingredients
-            .into_iter()
-            .map(|ing| {
-                let mine: Vec<&PantryItem> = items.iter().filter(|it| it.ingredient_id == ing.id).collect();
-                with_stock(ing, &mine)
-            })
-            .collect())
+        Ok(aggregate(ingredients, &items))
     }
 
     pub async fn get_ingredient(&self, id: &str) -> Result<IngredientWithStock> {
-        let ing = self.repo.find_ingredient(&self.db, id).await?;
-        let items = self.repo.list_items_for_ingredient(&self.db, id).await?;
-        Ok(with_stock(ing, &items.iter().collect::<Vec<_>>()))
+        self.list_ingredients().await?.into_iter().find(|i| i.ingredient.id == id).ok_or(Error::NotFound("식재료"))
     }
 
     pub async fn create_ingredient(&self, input: IngredientInput) -> Result<Ingredient> {
         let now = time::now();
         let ing = build_ingredient(new_id(), input, now.clone(), now)?;
+        self.check_parent(&ing).await?;
         self.repo.insert_ingredient(&self.db, &ing).await?;
         Ok(ing)
     }
@@ -49,8 +43,31 @@ impl PantryService {
     pub async fn update_ingredient(&self, id: &str, input: IngredientInput) -> Result<Ingredient> {
         let existing = self.repo.find_ingredient(&self.db, id).await?;
         let ing = build_ingredient(existing.id, input, existing.created_at, time::now())?;
+        self.check_parent(&ing).await?;
         self.repo.update_ingredient(&self.db, &ing).await?;
         Ok(ing)
+    }
+
+    /// 묶음은 한 단계만: 묶음의 묶음, 자기 자신, 하위가 있는 재료를 다른 묶음에 넣기는 금지
+    async fn check_parent(&self, ing: &Ingredient) -> Result<()> {
+        let Some(pid) = &ing.parent_id else { return Ok(()) };
+        if *pid == ing.id {
+            return Err(Error::invalid("자기 자신을 묶음으로 지정할 수 없습니다"));
+        }
+        let parent = match self.repo.find_ingredient(&self.db, pid).await {
+            Err(Error::NotFound(_)) => return Err(Error::invalid("묶음 재료가 존재하지 않습니다")),
+            other => other?,
+        };
+        if parent.parent_id.is_some() {
+            return Err(Error::invalid(format!(
+                "'{}'은(는) 다른 묶음에 속해 있어 묶음으로 쓸 수 없습니다",
+                parent.name
+            )));
+        }
+        if self.repo.count_children(&self.db, &ing.id).await? > 0 {
+            return Err(Error::invalid("하위 재료가 있는 묶음은 다른 묶음에 넣을 수 없습니다"));
+        }
+        Ok(())
     }
 
     pub async fn delete_ingredient(&self, id: &str) -> Result<()> {
@@ -80,6 +97,7 @@ impl PantryService {
                 low_threshold: None,
                 photo_id: None,
                 note: None,
+                parent_id: None,
             },
             now.clone(),
             now,
@@ -241,6 +259,7 @@ fn build_ingredient(id: String, input: IngredientInput, created_at: String, upda
         low_threshold: input.low_threshold,
         photo_id: clean(input.photo_id),
         note: clean(input.note),
+        parent_id: clean(input.parent_id),
         created_at,
         updated_at,
     })
@@ -297,6 +316,7 @@ pub fn with_stock(ingredient: Ingredient, items: &[&PantryItem]) -> IngredientWi
             status: StockStatus::None,
             stock_summary: None,
             nearest_expiry: None,
+            children: Vec::new(),
         };
     }
 
@@ -341,5 +361,127 @@ pub fn with_stock(ingredient: Ingredient, items: &[&PantryItem]) -> IngredientWi
         _ => StockStatus::Ok,
     };
 
-    IngredientWithStock { ingredient, status, stock_summary: Some(summary.join(" + ")), nearest_expiry }
+    IngredientWithStock {
+        ingredient,
+        status,
+        stock_summary: Some(summary.join(" + ")),
+        nearest_expiry,
+        children: Vec::new(),
+    }
+}
+
+/// 재료별 재고를 계산한 뒤, 묶음 재료에 하위 재료 재고를 합친다.
+/// 묶음 상태 = 자신과 하위 중 가장 좋은 상태, 요약 = "청양 고춧가루 보통, 고춧가루 조금"
+pub fn aggregate(ingredients: Vec<Ingredient>, items: &[PantryItem]) -> Vec<IngredientWithStock> {
+    let mut all: Vec<IngredientWithStock> = ingredients
+        .into_iter()
+        .map(|ing| {
+            let mine: Vec<&PantryItem> = items.iter().filter(|it| it.ingredient_id == ing.id).collect();
+            with_stock(ing, &mine)
+        })
+        .collect();
+
+    let mut kids: std::collections::HashMap<String, Vec<usize>> = std::collections::HashMap::new();
+    for (idx, w) in all.iter().enumerate() {
+        if let Some(p) = &w.ingredient.parent_id {
+            kids.entry(p.clone()).or_default().push(idx);
+        }
+    }
+
+    let mut updates = Vec::new();
+    for (idx, w) in all.iter().enumerate() {
+        let Some(children) = kids.get(&w.ingredient.id) else { continue };
+        let mut status = w.status;
+        let mut nearest = w.nearest_expiry;
+        let mut parts: Vec<String> = w.stock_summary.iter().cloned().collect();
+        for &c in children {
+            let child = &all[c];
+            status = status.max(child.status);
+            nearest = match (nearest, child.nearest_expiry) {
+                (Some(a), Some(b)) => Some(a.min(b)),
+                (a, b) => a.or(b),
+            };
+            if let Some(s) = &child.stock_summary {
+                parts.push(format!("{} {s}", child.ingredient.name));
+            }
+        }
+        let ids = children.iter().map(|&c| all[c].ingredient.id.clone()).collect();
+        updates.push((idx, status, (!parts.is_empty()).then(|| parts.join(", ")), nearest, ids));
+    }
+    for (idx, status, summary, nearest, ids) in updates {
+        let w = &mut all[idx];
+        w.status = status;
+        w.stock_summary = summary;
+        w.nearest_expiry = nearest;
+        w.children = ids;
+    }
+    all
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn ing(id: &str, name: &str, parent: Option<&str>) -> Ingredient {
+        Ingredient {
+            id: id.into(),
+            name: name.into(),
+            category: "양념".into(),
+            default_unit: None,
+            default_storage: Storage::Room,
+            low_threshold: None,
+            photo_id: None,
+            note: None,
+            parent_id: parent.map(Into::into),
+            created_at: String::new(),
+            updated_at: String::new(),
+        }
+    }
+
+    fn level_item(ing: &Ingredient, level: Level) -> PantryItem {
+        PantryItem {
+            id: format!("item-{}", ing.id),
+            ingredient_id: ing.id.clone(),
+            ingredient_name: ing.name.clone(),
+            category: ing.category.clone(),
+            tracking: Tracking::Level,
+            quantity: None,
+            unit: None,
+            level: Some(level),
+            storage: Storage::Room,
+            purchased_at: None,
+            expires_at: None,
+            photo_id: None,
+            note: None,
+            created_at: String::new(),
+            updated_at: String::new(),
+        }
+    }
+
+    #[test]
+    fn group_takes_best_child_status() {
+        let group = ing("g", "고춧가루", None);
+        let plain = ing("a", "고운 고춧가루", Some("g"));
+        let hot = ing("b", "청양 고춧가루", Some("g"));
+        let items = vec![level_item(&plain, Level::Low), level_item(&hot, Level::Medium)];
+        let out = aggregate(vec![group, plain, hot], &items);
+
+        let g = out.iter().find(|i| i.ingredient.id == "g").unwrap();
+        assert_eq!(g.status, StockStatus::Ok);
+        assert_eq!(g.children, vec!["a".to_string(), "b".to_string()]);
+        assert_eq!(g.stock_summary.as_deref(), Some("고운 고춧가루 조금, 청양 고춧가루 보통"));
+
+        let a = out.iter().find(|i| i.ingredient.id == "a").unwrap();
+        assert_eq!(a.status, StockStatus::Low);
+        assert!(a.children.is_empty());
+    }
+
+    #[test]
+    fn empty_group_has_no_stock() {
+        let group = ing("g", "간장", None);
+        let child = ing("c", "국간장", Some("g"));
+        let out = aggregate(vec![group, child], &[]);
+        assert_eq!(out[0].status, StockStatus::None);
+        assert_eq!(out[0].stock_summary, None);
+    }
 }

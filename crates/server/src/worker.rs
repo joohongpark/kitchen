@@ -91,7 +91,8 @@ async fn expiry_digest(state: &AppState) -> common::Result<()> {
         .list_ingredients()
         .await?
         .into_iter()
-        .filter(|i| i.status == StockStatus::Low)
+        // 묶음은 하위 재료와 중복되므로 제외
+        .filter(|i| i.status == StockStatus::Low && i.children.is_empty())
         .map(|i| match i.stock_summary {
             Some(s) => format!("{}({s})", i.ingredient.name),
             None => i.ingredient.name,

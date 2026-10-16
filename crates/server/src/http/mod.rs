@@ -37,6 +37,7 @@ pub fn router(state: AppState) -> Router {
         .route("/recipes", get(recipes::list).post(recipes::create))
         .route("/recipes/recommend", post(recipes::recommend))
         .route("/recipes/{id}", get(recipes::get).put(recipes::update).delete(recipes::delete))
+        .route("/recipes/{id}/photo", axum::routing::put(recipes::set_photo))
         .route("/recipes/{id}/cook-plan", get(recipes::cook_plan))
         .route("/recipes/{id}/cook", post(recipes::cook))
         .route("/recipes/{id}/cook-logs", get(recipes::cook_logs))

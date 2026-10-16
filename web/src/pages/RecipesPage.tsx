@@ -48,6 +48,11 @@ export function RecipeCard({ recipe, extra }: { recipe: RecipeSummary; extra?: R
         <p className={ready ? "text-sm font-semibold text-ok" : "truncate text-sm text-muted"}>
           {ready ? "✓ 바로 만들 수 있어요" : `없음 ${recipe.missing.length}: ${recipe.missing.map((m) => m.name).join(", ")}`}
         </p>
+        {recipe.substitutions.length > 0 && (
+          <p className="truncate text-xs text-muted">
+            대체: {recipe.substitutions.map((s) => `${s.original}→${s.substitute}`).join(", ")}
+          </p>
+        )}
         <div className="mt-1 flex flex-wrap items-center gap-1">
           {recipe.tags.map((t) => (
             <span key={t} className="rounded-full bg-accent-soft px-2 py-0.5 text-xs text-accent">

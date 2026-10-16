@@ -72,6 +72,17 @@ impl RecipeIngredient {
     }
 }
 
+/// 레시피 재료 줄의 대체 재료
+#[derive(Debug, Clone, Serialize, sqlx::FromRow)]
+pub struct RecipeAlternative {
+    pub recipe_id: String,
+    pub ingredient_id: String,
+    pub alt_ingredient_id: String,
+    pub alt_name: String,
+    pub position: i64,
+    pub note: Option<String>,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize, sqlx::FromRow)]
 pub struct RecipeStep {
     pub position: i64,
@@ -84,6 +95,19 @@ pub struct IngredientLine {
     #[serde(flatten)]
     pub item: RecipeIngredient,
     pub amount_label: String,
+    /// 원래 재료의 재고 상태 (묶음이면 하위 재료 포함)
+    pub status: StockStatus,
+    pub stock_summary: Option<String>,
+    pub alternatives: Vec<AlternativeLine>,
+    /// 원래 재료가 없고 대체 재료가 있을 때, 쓸 수 있는 대체 재료 이름
+    pub substitute: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct AlternativeLine {
+    pub ingredient_id: String,
+    pub name: String,
+    pub note: Option<String>,
     pub status: StockStatus,
     pub stock_summary: Option<String>,
 }
@@ -104,6 +128,8 @@ pub struct RecipeSummary {
     pub recipe: Recipe,
     pub required_count: usize,
     pub missing: Vec<MissingIngredient>,
+    /// 대체 재료로 채운 필수 재료
+    pub substitutions: Vec<Substitution>,
     pub cook_count: i64,
     pub last_cooked_at: Option<String>,
 }
@@ -113,6 +139,14 @@ pub struct MissingIngredient {
     pub ingredient_id: String,
     pub name: String,
     pub amount_label: String,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct Substitution {
+    /// 원래 재료
+    pub original: String,
+    /// 대신 쓸 재료
+    pub substitute: String,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -153,6 +187,21 @@ pub struct RecipeIngredientInput {
     pub amount_text: Option<String>,
     #[serde(default)]
     pub optional: bool,
+    #[serde(default)]
+    pub note: Option<String>,
+    #[serde(default)]
+    pub alternatives: Vec<AlternativeInput>,
+}
+
+/// 대체 재료. `ingredient_id` 또는 `name` (이름만 주면 식재료 자동 생성)
+#[derive(Debug, Clone, Deserialize)]
+pub struct AlternativeInput {
+    #[serde(default)]
+    pub ingredient_id: Option<String>,
+    #[serde(default)]
+    pub name: Option<String>,
+    #[serde(default)]
+    pub category: Option<String>,
     #[serde(default)]
     pub note: Option<String>,
 }
@@ -203,6 +252,11 @@ pub struct CookPlanLine {
 #[derive(Debug, Clone, Serialize)]
 pub struct CookPlanLot {
     pub pantry_item_id: String,
+    /// 실제 재고 재료 (묶음의 하위 재료나 대체 재료일 수 있음)
+    pub ingredient_id: String,
+    pub ingredient_name: String,
+    /// 원래 재료가 아닌 대체 재료인지
+    pub is_substitute: bool,
     pub tracking: Tracking,
     pub storage: Storage,
     pub expires_at: Option<NaiveDate>,
@@ -245,4 +299,9 @@ pub struct CookResult {
     pub log: CookLog,
     /// 장보기 목록에 추가된 재료 이름
     pub added_to_shopping: Vec<String>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct SetPhotoInput {
+    pub photo_id: Option<String>,
 }
